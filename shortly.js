@@ -3,6 +3,8 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt-nodejs');
+var cookieParser = require('cookie-parser');
+
 var db = require('./app/config');
 var Users = require('./app/collections/users');
 var User = require('./app/models/user');
@@ -24,11 +26,17 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
-app.use(session({secret: 'keyboard cat', cookie: {maxAge:60000}}));
+app.use(cookieParser());
+app.use(session({secret: 'keyboard cat', cookie: {maxAge:6000}}));
 
 app.get('/', 
 function(req, res) {
-  res.render('index');
+  //check req.session....
+  if (req.session) {
+    res.render('index');
+  } else {
+    res.render('login');
+  }
 });
 
 app.get('/create', 
@@ -111,7 +119,12 @@ function(req, res) {
 
 app.get('/login', 
 function(req, res) {
-  res.render('login');
+  console.log(req.session);
+  if(req.session){
+    res.redirect('/');
+  } else {
+    res.render('login');
+  }
 });
 
 app.post('/login',
@@ -127,7 +140,7 @@ app.post('/login',
         } else {
           bcrypt.compare(password, found.get('password'), function(err, result){
             if(result){
-              //correct password, start sesh
+              //correct password, start sesh, 
               req.session.regenerate(function(){
                 req.session.user = username;
                 res.redirect('/');
@@ -140,6 +153,17 @@ app.post('/login',
           });
         }
       });
+  });
+
+  app.get('/logout', function(req, res) {
+    // req.session = null;
+    // if(req.session){
+        req.session.destroy(function(err){
+          console.log('logout');
+          // res.render('/login');
+          res.redirect('/login');
+        });
+      // }
   });
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
