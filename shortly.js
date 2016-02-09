@@ -2,8 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
-
+var bcrypt = require('bcrypt-nodejs');
 var db = require('./app/config');
 var Users = require('./app/collections/users');
 var User = require('./app/models/user');
@@ -11,7 +10,11 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
+var session = require('express-session');
+
+
 var app = express();
+
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -21,7 +24,7 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
-
+app.use(session({secret: 'keyboard cat', cookie: {maxAge:60000}}));
 
 app.get('/', 
 function(req, res) {
@@ -102,8 +105,7 @@ function(req, res) {
           res.send(302);
         });
       }
-    });     
-    //TODO??? .save();
+    });
 });
 
 
@@ -123,12 +125,19 @@ app.post('/login',
           res.set('location', '/login');
           res.send(302);
         } else {
-          //hash password
-          console.log(Users);
-          //compare to password in database
-
-            //if it is viable, then initiate sesh
-          res.send(200);
+          bcrypt.compare(password, found.get('password'), function(err, result){
+            if(result){
+              //correct password, start sesh
+              req.session.regenerate(function(){
+                req.session.user = username;
+                res.redirect('/');
+              });
+            } else {
+              res.set('Content-Type', 'text/html');
+              res.set('location', '/login');
+              res.send(302);
+            }
+          });
         }
       });
   });
