@@ -76,8 +76,27 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+app.get('/signup', 
+function(req, res) {
+  res.render('signup');
+});
 
-
+app.post('/signup', 
+function(req, res) {
+  //get info from req object
+  var username = req.body.username;
+  var password = req.body.password;
+  new User({username : username, password : password})
+    .save()
+    // .then(function(model){
+    //   console.log(model);
+    //   new User({username : username})
+    //   .fetch()
+    //   .then(function(found){
+    //     console.log(found);   
+    //   });
+    // });
+});
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
 // assume the route is a short code and try and handle it here.
