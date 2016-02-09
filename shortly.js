@@ -86,16 +86,22 @@ function(req, res) {
   //get info from req object
   var username = req.body.username;
   var password = req.body.password;
-  new User({username : username, password : password})
-    .save()
-    // .then(function(model){
-    //   console.log(model);
-    //   new User({username : username})
-    //   .fetch()
-    //   .then(function(found){
-    //     console.log(found);   
-    //   });
-    // });
+  new User({username : username}).fetch()
+    .then(function(found){
+      if(found){
+        res.send(200, found.attributes);
+      } else {
+
+        Users.create({
+          username : username, 
+          password : password
+        })
+        .then(function(newUser) {
+          res.send(200, newUser);
+        });
+      }
+    });     
+    //TODO! .save();
 });
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail

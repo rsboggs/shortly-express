@@ -10,10 +10,8 @@ var User = db.Model.extend({
   //initialize and manipulate actual database
   initialize: function(){
     this.on('creating', function(model, attrs, options){
-      //
-      model.set('username', "bigbabyjesus");
-      console.log('>>>>>>>>>>>',model.get("username"));
-      // db.knex('users').insert({username : '', password : 'e'});
+      var shasum = bcrypt.hashSync(model.get('password'));
+      model.set('password', shasum);
     });
   }
 });
