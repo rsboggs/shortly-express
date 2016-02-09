@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "start": "./node_modules/.bin/nodemon --ignore node_modules shortly.js",
-    "test": "node shortly.js & ./node_modules/.bin/mocha --bail test/ServerSpec.js; pkill -n node;",
+    "test": "node shortly.js & ./node_modules/.bin/mocha test/ServerSpec.js; pkill -n node;",
     "postinstall": "bash pomander.sh",
     "lint": "eslint ./"
   },
@@ -24,7 +24,7 @@
     "express-session": "^1.7.2",
     "forever": "^0.10.11",
     "knex": "^0.9.0",
-    "nodemon": "^1.2.1",
+    "nodemon": "^1.8.1",
     "request": "^2.34.0",
     "sqlite3": "~3.0.5"
   },
