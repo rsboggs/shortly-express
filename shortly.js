@@ -97,12 +97,41 @@ function(req, res) {
           password : password
         })
         .then(function(newUser) {
-          res.send(200, newUser);
+          res.set('Content-Type', 'text/html');
+          res.set('location', '/');
+          res.send(302);
         });
       }
     });     
-    //TODO! .save();
+    //TODO??? .save();
 });
+
+
+app.get('/login', 
+function(req, res) {
+  res.render('login');
+});
+
+app.post('/login',
+  function(req,res){
+    var username = req.body.username;
+    var password = req.body.password;
+    new User({username : username}).fetch()
+      .then(function(found){
+        if(!found){
+          res.set('Content-Type', 'text/html');
+          res.set('location', '/login');
+          res.send(302);
+        } else {
+          //hash password
+          console.log(Users);
+          //compare to password in database
+
+            //if it is viable, then initiate sesh
+          res.send(200);
+        }
+      });
+  });
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
 // assume the route is a short code and try and handle it here.
