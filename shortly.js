@@ -6,6 +6,10 @@ var bcrypt = require('bcrypt-nodejs');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 
+//passport
+var passport = require('passport');
+var GithubStrategy = require('passport-github').Strategy;
+
 var db = require('./app/config');
 var Users = require('./app/collections/users');
 var User = require('./app/models/user');
@@ -13,6 +17,27 @@ var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 
+passport.use(new GithubStrategy({
+  clientID: 'd45b54974da20d19337d',
+  clientSecret: '37f808187f356635f5bba1639fe04bcb970035c6',
+  callbackURL: 'http://127.0.0.1:4568/login/github/callback'
+}, function(accessToken, refreshToken, profile, done){
+  process.nextTick(function(){
+    return done(null, profile);
+  });
+  // done(null, {
+  //   accessToken: accessToken,
+  //   profile: profile
+  // });
+}));
+
+passport.serializeUser(function(user, cb) {
+  cb(null, user);
+});
+
+passport.deserializeUser(function(obj, cb) {
+  cb(null, obj);
+});
 
 
 var app = express();
@@ -29,7 +54,28 @@ app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 app.use(session({secret: 'keyboard cat', cookie: {maxAge:60000}}));
 
-app.get('/', util.checkUser,
+//passport////////////////////////////////////
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+
+app.get('/login/github', passport.authenticate('github'), function(req,res){});
+
+app.get('/login/github/callback', 
+  passport.authenticate('github', {'failureRedirect': '/login'}), 
+  function(req, res){
+    console.log("fasho");
+    res.redirect('/');
+});
+
+// app.get('/login/callback',
+//   passport.authenticate('github', {failureRedirect: '/login/error'}),
+//   util.callback
+// );
+///////////////////////////////////
+
+app.get('/',
 function(req, res) {
   res.render('index');
 });
